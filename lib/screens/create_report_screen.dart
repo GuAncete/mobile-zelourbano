@@ -1,8 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // Add for kIsWeb
 import 'package:image_picker/image_picker.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import '../utils/type_helper.dart';
 
 class CreateReportScreen extends StatefulWidget {
   final LatLng initialLocation;
@@ -19,19 +22,12 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
   final _descricaoController = TextEditingController();
   String _tipoDenuncia = 'buraco'; // default type
   
-  File? _imageFile;
+  XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
   final ApiService _apiService = ApiService();
   bool _isLoading = false;
 
-  final List<String> _tipos = [
-    'buraco',
-    'iluminacao',
-    'lixo',
-    'saneamento',
-    'arvore',
-    'outro'
-  ];
+  final List<String> _tipos = TypeHelper.getValoresList();
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await _picker.pickImage(
@@ -41,14 +37,18 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
     
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = pickedFile;
       });
     }
   }
 
+
+
   void _submitReport() async {
+    print('Botão de enviar clicado!');
     if (_formKey.currentState!.validate()) {
       if (_imageFile == null) {
+        print('Erro: A foto é obrigatoria');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Por favor, tire uma foto do problema.')),
         );
@@ -58,20 +58,29 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
       setState(() => _isLoading = true);
 
       try {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final user = authProvider.user;
+
         // 1. Create the report
         final denunciaData = {
           'titulo_denuncia': _tituloController.text.trim(),
-          'tipo_denuncia': _tipoDenuncia,
+          'tipo_denuncia': int.parse(TypeHelper.getId(_tipoDenuncia)),
           'descricao_denuncia': _descricaoController.text.trim(),
+          'status_denuncia': 1, // 1 representa 'pendente' no banco
           'latitude_denuncia': widget.initialLocation.latitude.toString(),
           'longitude_denuncia': widget.initialLocation.longitude.toString(),
-          // Data gets added by Laravel automatically usually or we can rely on its timestamp
+          if (user != null) 'id_user': user.id,
         };
+
+        print('\n--- ENVIANDO DENÚNCIA PARA API ---');
+        print('Location: ${widget.initialLocation.latitude}, ${widget.initialLocation.longitude}');
+        print('Payload: $denunciaData');
+        print('----------------------------------\n');
 
         final createdDenuncia = await _apiService.createDenuncia(denunciaData);
 
         // 2. Upload the photo
-        await _apiService.uploadFotoDenuncia(createdDenuncia.id, _imageFile!.path);
+        await _apiService.uploadFotoDenunciaXFile(createdDenuncia.id, _imageFile!);
 
         if (mounted) {
            ScaffoldMessenger.of(context).showSnackBar(
@@ -83,6 +92,7 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
            Navigator.pop(context, true); // Return true to signal map refresh
         }
       } catch (e) {
+        print('Catch Erro _submitReport(): $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
              SnackBar(
@@ -96,6 +106,8 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
           setState(() => _isLoading = false);
         }
       }
+    } else {
+      print('Erro: Validação do formulário falhou!');
     }
   }
 
@@ -123,12 +135,7 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
                     decoration: BoxDecoration(
                       color: Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(16),
-                      image: _imageFile != null 
-                         ? DecorationImage(
-                             image: FileImage(_imageFile!),
-                             fit: BoxFit.cover,
-                           )
-                         : null,
+                      // Removemos a verificação isWeb e setamos via builder pois readAsBytes() é assincrono
                     ),
                     child: _imageFile == null 
                       ? Column(
@@ -142,7 +149,25 @@ class _CreateReportScreenState extends State<CreateReportScreen> {
                             )
                           ],
                         )
-                      : null,
+                      : FutureBuilder<Uint8List>(
+                          future: _imageFile!.readAsBytes(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+                            if (snapshot.hasData) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.memory(
+                                  snapshot.data!,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
+                              );
+                            }
+                            return const Center(child: Icon(Icons.error));
+                          },
+                        ),
                   ),
                 ),
                 

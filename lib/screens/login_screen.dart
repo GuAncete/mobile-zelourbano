@@ -18,15 +18,15 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (_formKey.currentState!.validate()) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
-      final success = await auth.login(
+      final errorMsg = await auth.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
-      if (!success && mounted) {
+      if (errorMsg != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao fazer login. Verifique suas credenciais.'),
+          SnackBar(
+            content: Text(errorMsg),
             backgroundColor: Colors.redAccent,
           ),
         );
