@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../services/api_service.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -18,6 +19,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _documentoController = TextEditingController();
   final _telefoneController = TextEditingController();
   
+  final _cpfFormatter = MaskTextInputFormatter(
+    mask: '###.###.###-##', 
+    filter: { "#": RegExp(r'[0-9]') },
+  );
+
+  final _telefoneFormatter = MaskTextInputFormatter(
+    mask: '(##) #####-####', 
+    filter: { "#": RegExp(r'[0-9]') },
+  );
+  
   bool _isLoading = false;
 
   void _register() async {
@@ -31,7 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'password_usuario': _passwordController.text,
           'documento_usuario': _documentoController.text.trim(),
           'telefone_usuario': _telefoneController.text.trim(),
-          'tipo_usuario': 1, // 1 = cidadão, 2 = funcionário
+          'tipo_usuario': 0, // 0 = cidadão
           'status_usuario': true,
         });
 
@@ -123,24 +134,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _documentoController,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [_cpfFormatter],
                   decoration: const InputDecoration(
                     labelText: 'CPF',
                     prefixIcon: Icon(Icons.badge_outlined),
                   ),
                   validator: (value) => 
-                      value == null || value.isEmpty ? 'Campo obrigatório' : null,
+                      value == null || value.isEmpty ? 'Campo obrigatório' : 
+                      value.length < 14 ? 'CPF incompleto' : null,
                 ),
                 const SizedBox(height: 16),
                 
                 TextFormField(
                   controller: _telefoneController,
                   keyboardType: TextInputType.phone,
+                  inputFormatters: [_telefoneFormatter],
                   decoration: const InputDecoration(
                     labelText: 'Telefone',
                     prefixIcon: Icon(Icons.phone_outlined),
                   ),
                   validator: (value) => 
-                      value == null || value.isEmpty ? 'Campo obrigatório' : null,
+                      value == null || value.isEmpty ? 'Campo obrigatório' : 
+                      value.length < 14 ? 'Telefone incompleto' : null,
                 ),
                 const SizedBox(height: 16),
 

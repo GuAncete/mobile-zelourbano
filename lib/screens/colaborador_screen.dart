@@ -853,9 +853,9 @@ class _DenunciaDetailSheetState extends State<_DenunciaDetailSheet> {
                         const SizedBox(height: 16),
                       ],
 
-                      // Instruções do Administrador
+                      // Instruções
                       if (widget.denuncia.descricaoAdmin.isNotEmpty) ...[
-                        const Text('Instruções do Administrador', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.orange)),
+                        const Text('Instruções', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.orange)),
                         const SizedBox(height: 6),
                         Container(
                           width: double.infinity,

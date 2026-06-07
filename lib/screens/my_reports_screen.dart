@@ -7,6 +7,7 @@ import '../utils/constants.dart';
 import '../utils/status_denuncia.dart';
 import '../utils/type_helper.dart';
 import 'package:intl/intl.dart';
+import 'report_details_screen.dart';
 
 class MyReportsScreen extends StatefulWidget {
   const MyReportsScreen({super.key});
@@ -34,7 +35,7 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: StatusDenuncia.cidadaoTodos.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Minhas Denúncias'),
@@ -49,7 +50,7 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
           ],
           bottom: TabBar(
             isScrollable: true,
-            tabs: StatusDenuncia.todos.map((s) => Tab(
+            tabs: StatusDenuncia.cidadaoTodos.map((s) => Tab(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -72,9 +73,9 @@ class _MyReportsScreenState extends State<MyReportsScreen> {
             }
 
             return TabBarView(
-              children: StatusDenuncia.todos.map((s) {
+              children: StatusDenuncia.cidadaoTodos.map((s) {
                 final filtered = reportProvider.userDenuncias
-                    .where((d) => d.status == s.id.toString())
+                    .where((d) => StatusDenuncia.getCitizenStatusId(d.status) == s.id.toString())
                     .toList();
                 return _ReportList(
                   denuncias: filtered,
@@ -222,7 +223,12 @@ class _ReportList extends StatelessWidget {
               ),
               trailing: const Icon(Icons.chevron_right),
               onTap: () {
-                // TODO: Open details
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReportDetailsScreen(denuncia: denuncia),
+                  ),
+                );
               },
             ),
           );
@@ -238,8 +244,8 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = StatusDenuncia.getColor(status);
-    final text = StatusDenuncia.getNome(status);
+    final color = StatusDenuncia.getCitizenColor(status);
+    final text = StatusDenuncia.getCitizenNome(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

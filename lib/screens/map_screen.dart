@@ -177,7 +177,7 @@ class _MapScreenState extends State<MapScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: StatusDenuncia.todos.map((s) => _buildLegendItem(s.cor, s.nome)).toList(),
+            children: StatusDenuncia.cidadaoTodos.map((s) => _buildLegendItem(s.cor, s.nome)).toList(),
           ),
           actions: [
             TextButton(
@@ -212,7 +212,7 @@ class _MapScreenState extends State<MapScreen> {
           },
           child: Icon(
             Icons.location_on,
-            color: StatusDenuncia.getColor(d.status),
+            color: StatusDenuncia.getCitizenColor(d.status),
             size: 40,
           ),
         ),
@@ -304,8 +304,8 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = StatusDenuncia.getColor(status);
-    final text = StatusDenuncia.getNome(status);
+    final color = StatusDenuncia.getCitizenColor(status);
+    final text = StatusDenuncia.getCitizenNome(status);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

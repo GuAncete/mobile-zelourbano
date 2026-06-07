@@ -103,11 +103,6 @@ class ZeloUrbanoApp extends StatelessWidget {
       ),
       home: Consumer<AuthProvider>(
         builder: (context, auth, _) {
-          if (auth.isLoading) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
           if (auth.isAuthenticated) {
             return const MainScreen();
           } else {

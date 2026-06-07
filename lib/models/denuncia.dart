@@ -72,6 +72,7 @@ class Denuncia {
     String? start;
     String? end;
     String? relatorio;
+    String msgAdmin = '';
     int acc = 0;
 
     if (json['atendimentos'] != null && json['atendimentos'] is List && (json['atendimentos'] as List).isNotEmpty) {
@@ -81,6 +82,7 @@ class Denuncia {
       end = lastAtendimento['data_fim_atendimento'];
       acc = lastAtendimento['tempo_acumulado'] ?? 0;
       relatorio = lastAtendimento['relatorio_colaborador'];
+      msgAdmin = lastAtendimento['descricao_atendimento'] ?? '';
     }
 
     return Denuncia(
@@ -95,7 +97,7 @@ class Denuncia {
       imagens: imgs,
       fotosCidadao: imgsCidadao,
       fotosColaborador: imgsColab,
-      descricaoAdmin: json['mensagem_admin'] ?? '',
+      descricaoAdmin: msgAdmin,
       justificativaCancelamento: json['justificativa_cancelamento'] ?? '',
       mensagemCidadao: json['mensagem_cidadao'] ?? '',
       relatorioColaborador: relatorio,

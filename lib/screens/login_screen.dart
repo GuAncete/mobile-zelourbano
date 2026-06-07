@@ -50,21 +50,10 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 40),
-                // Logo Icon
-                Icon(
-                  Icons.location_city_rounded,
-                  size: 80,
-                  color: primaryColor,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Zelo Urbano',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
+                Image.asset(
+                  'assets/logo.png',
+                  height: 180,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 8),
                 Text(
