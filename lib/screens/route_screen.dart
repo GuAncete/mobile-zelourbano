@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:http/http.dart' as http;
@@ -38,8 +39,7 @@ class _RouteScreenState extends State<RouteScreen> {
     final startUrlStr = '${start.longitude},${start.latitude}';
     final destUrlStr = '${dest.longitude},${dest.latitude}';
 
-    // Usando Mapbox Directions API
-    const mapboxToken = String.fromEnvironment('MAPBOX_TOKEN');
+    final mapboxToken = dotenv.env['MAPBOX_TOKEN'] ?? '';
     
     final url = Uri.parse(
       'https://api.mapbox.com/directions/v5/mapbox/driving/$startUrlStr;$destUrlStr?geometries=geojson&access_token=$mapboxToken&overview=full'
